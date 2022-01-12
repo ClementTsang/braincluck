@@ -1,3 +1,3 @@
-# brainduck-parser
+# brainduck-interpreter
 
-A brainfuck parser, using [lalrpop](https://github.com/lalrpop/lalrpop). Somewhat overkill.
+A bf parser/interpreter, using [lalrpop](https://github.com/lalrpop/lalrpop). Somewhat overkill.
