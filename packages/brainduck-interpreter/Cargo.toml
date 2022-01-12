@@ -1,0 +1,12 @@
+[package]
+name = "brainduck-interpreter"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+lalrpop = "0.19.6"
+
+[dependencies]
+lalrpop-util = { version = "0.19", features = ["lexer"] }
+regex = "1"
+# num = "0.4"

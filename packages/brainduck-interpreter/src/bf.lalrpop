@@ -1,0 +1,33 @@
+use crate::commands::Command;
+use crate::lexer;
+
+grammar;
+
+pub Brainduck: Vec<Command> = {
+    <term*>,
+}
+
+term: Command = {
+    ">" => Command::Right,
+    "<" => Command::Left,
+    "+" => Command::Increment,
+    "-" => Command::Decrement,
+    "." => Command::Output,
+    "," => Command::Input,
+    "[" <term*> "]" => Command::Jump(<>),
+}
+
+extern {
+    type Location = usize;
+    type Error = lexer::LexicalError;
+    enum lexer::Tok {
+        ">" => lexer::Tok::GreaterThan,
+        "<" => lexer::Tok::LessThan,
+        "+" => lexer::Tok::Plus,
+        "-" => lexer::Tok::Minus,
+        "." => lexer::Tok::Period,
+        "," => lexer::Tok::Comma,
+        "[" => lexer::Tok::LeftBracket,
+        "]" => lexer::Tok::RightBracket,
+    }
+}

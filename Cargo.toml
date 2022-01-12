@@ -1,0 +1,2 @@
+[workspace]
+members = ["packages/brainduck-interpreter", "packages/brainduck-repl"]
