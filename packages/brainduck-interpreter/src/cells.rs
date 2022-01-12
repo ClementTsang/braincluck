@@ -9,11 +9,12 @@ use crate::Command;
 /// desired capacity, or `Cells::default()`, which will initialize the memory with the capacity
 /// for 30 000 cells.
 ///
-/// Implementation-wise, this is just a wrapper around a deque with a tracked index.
+/// Implementation-wise, this is just a wrapper around a [`VecDeque`] with a tracked index.
 #[derive(Debug, Clone)]
 pub struct Cells {
-    memory: VecDeque<i8>,
+    memory: VecDeque<i8>, // TODO: Configurable bit size
     index: usize,
+    // TODO: Writer/Input
 }
 
 impl Cells {
@@ -105,6 +106,7 @@ impl Default for Cells {
     }
 }
 
+/// All these tests are based on code from the [Esolang wiki page](https://esolangs.org/wiki/Brainfuck) on the language.
 #[cfg(test)]
 mod tests {
     use crate::{bf_parse, Cells};
@@ -153,6 +155,7 @@ mod tests {
         cells.interpret(&commands);
     }
 
+    /// Tests obtaining the cell size.
     #[test]
     fn cell_size() {
         let mut cells = Cells::default();
@@ -181,6 +184,26 @@ mod tests {
         "##;
 
         let commands = bf_parse(program).expect("cell size parsing returned an error");
+        cells.interpret(&commands);
+    }
+
+    /// A cat program where EOF returns 0.
+    #[test]
+    fn cat_zero() {
+        let mut cells = Cells::default();
+        let program = ",[.,]";
+        let commands = bf_parse(program).expect("cat zero parsing returned an error");
+
+        cells.interpret(&commands);
+    }
+
+    /// A cat program where EOF returns -1.
+    #[test]
+    fn cat_negative_one() {
+        let mut cells = Cells::default();
+        let program = ",+[-.,+]";
+        let commands = bf_parse(program).expect("cat negative one parsing returned an error");
+
         cells.interpret(&commands);
     }
 }

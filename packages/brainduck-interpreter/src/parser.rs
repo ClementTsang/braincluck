@@ -1,6 +1,7 @@
 use lalrpop_util::lalrpop_mod;
 lalrpop_mod!(pub bf);
 
+/// All these tests are based on code from the [Esolang wiki page](https://esolangs.org/wiki/Brainfuck) on the language.
 #[cfg(test)]
 mod tests {
     use crate::{bf_parse, Command};
