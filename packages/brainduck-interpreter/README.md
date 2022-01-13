@@ -16,18 +16,17 @@ You then need to initialize `Cells`, which represents your memory cell array:
 let mut cells = Cells::default();
 ```
 
-You also need something you can write to (implementing `std::fmt::Write`) and a reader (implementing `std::io::Read`):
+You also need something you can write to (implementing `std::io::Write`) and a reader (implementing `std::io::Read`):
 
 ```rust
-let mut out = String::new();
-let input = vec![];
-let mut cursor = Cursor::new(input);
+let mut out = stdout();
+let mut input = stdin();
 ```
 
 You can then feed a reference to these commands, writer, and reader to these cells via `interpret`:
 
 ```rust
-cells.interpret(&commands, out, cursor);
+cells.interpret(&commands, &mut out, &mut input).unwrap();
 ```
 
 A complete example demonstrating Hello World (source bf program from
@@ -37,9 +36,9 @@ A complete example demonstrating Hello World (source bf program from
 let mut cells = Cells::default();
 let program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 let commands = bf_parse(program).unwrap();
-let mut out = String::new();
-let input = vec![];
-let mut cursor = Cursor::new(input);
-cells.interpret(&commands, &mut out, &mut cursor).unwrap();
-println!("{}", out);
+let mut out = stdout();
+let mut input = stdin();
+cells.interpret(&commands, &mut out, &mut input).unwrap();
 ```
+
+See [here](../../examples/hello_world/) for an example.

@@ -3,4 +3,5 @@ members = [
     "packages/brainduck-interpreter",
     "packages/brainduck-repl",
     "examples/hello_world",
+    "examples/cat",
 ]

@@ -1,4 +1,7 @@
-use std::{collections::VecDeque, fmt::Write, io::Read};
+use std::{
+    collections::VecDeque,
+    io::{Read, Write},
+};
 
 use crate::{BrainduckError, Command};
 
@@ -127,7 +130,7 @@ impl Default for Cells {
 #[cfg(test)]
 mod tests {
 
-    use std::io::Cursor;
+    use std::io::{BufWriter, Cursor};
 
     use crate::{bf_parse, Cells};
 
@@ -138,15 +141,25 @@ mod tests {
         let program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
         let commands = bf_parse(program).expect("hello world parsing returned an error");
 
-        let mut out = String::new();
+        let out = vec![];
+        let mut buf_out = BufWriter::new(out);
         let input = vec![];
         let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out, &mut cursor)
+            .interpret(&commands, &mut buf_out, &mut cursor)
             .expect("interpret should succeed");
 
-        assert_eq!("Hello World!\n".to_string(), out, "outputs should match");
+        assert_eq!(
+            "Hello World!\n".to_string(),
+            String::from_utf8(
+                buf_out
+                    .into_inner()
+                    .expect("getting inner buffer should work")
+            )
+            .expect("string should be valid utf8"),
+            "outputs should match"
+        );
     }
 
     /// This test can fail if cell values cannot be set below zero.
@@ -157,15 +170,25 @@ mod tests {
         +++..+++.>-.<<+[>[+>+]>>]<--------------.>>.+++.------.--------.>+.>+.";
         let commands = bf_parse(program).expect("tricky hello world parsing returned an error");
 
-        let mut out = String::new();
+        let out = vec![];
+        let mut buf_out = BufWriter::new(out);
         let input = vec![];
         let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out, &mut cursor)
+            .interpret(&commands, &mut buf_out, &mut cursor)
             .expect("interpret should succeed");
 
-        assert_eq!("Hello World!\n".to_string(), out, "outputs should match");
+        assert_eq!(
+            "Hello World!\n".to_string(),
+            String::from_utf8(
+                buf_out
+                    .into_inner()
+                    .expect("getting inner buffer should work")
+            )
+            .expect("string should be valid utf8"),
+            "outputs should match"
+        );
     }
 
     /// A program to write hello world but requires wrapping cells.
@@ -176,15 +199,25 @@ mod tests {
             "--<-<<+[+[<+>--->->->-<<<]>]<<--.<++++++.<<-..<<.<+.>>.>>.<<<.+++.>>.>>-.<<<+.";
         let commands = bf_parse(program).expect("wrapping hello world parsing returned an error");
 
-        let mut out = String::new();
+        let out = vec![];
+        let mut buf_out = BufWriter::new(out);
         let input = vec![];
         let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out, &mut cursor)
+            .interpret(&commands, &mut buf_out, &mut cursor)
             .expect("interpret should succeed");
 
-        assert_eq!("Hello, World!".to_string(), out, "outputs should match");
+        assert_eq!(
+            "Hello, World!".to_string(),
+            String::from_utf8(
+                buf_out
+                    .into_inner()
+                    .expect("getting inner buffer should work")
+            )
+            .expect("string should be valid utf8"),
+            "outputs should match"
+        );
     }
 
     /// A program to write hello world using the shortest code golf example. Requires wrapping cells.
@@ -194,15 +227,25 @@ mod tests {
         let program = "+[-->-[>>+>-----<<]<--<---]>-.>>>+.>>..+++[.>]<<<<.+++.------.<<-.>>>>+.";
         let commands = bf_parse(program).expect("short hello world parsing returned an error");
 
-        let mut out = String::new();
+        let out = vec![];
+        let mut buf_out = BufWriter::new(out);
         let input = vec![];
         let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out, &mut cursor)
+            .interpret(&commands, &mut buf_out, &mut cursor)
             .expect("interpret should succeed");
 
-        assert_eq!("Hello, World!".to_string(), out, "outputs should match");
+        assert_eq!(
+            "Hello, World!".to_string(),
+            String::from_utf8(
+                buf_out
+                    .into_inner()
+                    .expect("getting inner buffer should work")
+            )
+            .expect("string should be valid utf8"),
+            "outputs should match"
+        );
     }
 
     /// Tests obtaining the cell size.
@@ -234,15 +277,25 @@ mod tests {
         "##;
         let commands = bf_parse(program).expect("cell size parsing returned an error");
 
-        let mut out = String::new();
+        let out = vec![];
+        let mut buf_out = BufWriter::new(out);
         let input = vec![];
         let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out, &mut cursor)
+            .interpret(&commands, &mut buf_out, &mut cursor)
             .expect("interpret should succeed");
 
-        assert_eq!("8 bit cells\n".to_string(), out, "outputs should match");
+        assert_eq!(
+            "8 bit cells\n".to_string(),
+            String::from_utf8(
+                buf_out
+                    .into_inner()
+                    .expect("getting inner buffer should work")
+            )
+            .expect("string should be valid utf8"),
+            "outputs should match"
+        );
     }
 
     /// A cat program where EOF returns 0.
@@ -252,17 +305,27 @@ mod tests {
         let program = ",[.,]";
         let commands = bf_parse(program).expect("cat zero parsing returned an error");
 
-        let mut out = String::new();
+        let out = vec![];
+        let mut buf_out = BufWriter::new(out);
         let input = vec![
             'H' as u8, 'e' as u8, 'l' as u8, 'l' as u8, 'o' as u8, '!' as u8, 0,
         ];
         let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out, &mut cursor)
+            .interpret(&commands, &mut buf_out, &mut cursor)
             .expect("interpret should succeed");
 
-        assert_eq!("Hello!".to_string(), out, "outputs should match");
+        assert_eq!(
+            "Hello!".to_string(),
+            String::from_utf8(
+                buf_out
+                    .into_inner()
+                    .expect("getting inner buffer should work")
+            )
+            .expect("string should be valid utf8"),
+            "outputs should match"
+        );
     }
 
     /// A cat program where EOF returns -1.
@@ -272,7 +335,8 @@ mod tests {
         let program = ",+[-.,+]";
         let commands = bf_parse(program).expect("cat negative one parsing returned an error");
 
-        let mut out = String::new();
+        let out = vec![];
+        let mut buf_out = BufWriter::new(out);
         let input = vec![
             'H' as u8,
             'e' as u8,
@@ -285,9 +349,18 @@ mod tests {
         let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out, &mut cursor)
+            .interpret(&commands, &mut buf_out, &mut cursor)
             .expect("interpret should succeed");
 
-        assert_eq!("Hello!".to_string(), out, "outputs should match");
+        assert_eq!(
+            "Hello!".to_string(),
+            String::from_utf8(
+                buf_out
+                    .into_inner()
+                    .expect("getting inner buffer should work")
+            )
+            .expect("string should be valid utf8"),
+            "outputs should match"
+        );
     }
 }
