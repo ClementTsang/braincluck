@@ -78,11 +78,11 @@ impl Cells {
     pub fn interpret<W: Write, R: Read>(
         &mut self,
         commands: &[Command],
-        out: &mut W,
+        output: &mut W,
         input: &mut R,
     ) -> Result<(), BrainduckError> {
         for command in commands {
-            self.execute(command, out, input)?;
+            self.execute(command, output, input)?;
         }
 
         Ok(())
@@ -92,7 +92,7 @@ impl Cells {
     pub fn execute<W: Write, R: Read>(
         &mut self,
         command: &Command,
-        out: &mut W,
+        output: &mut W,
         input: &mut R,
     ) -> Result<(), BrainduckError> {
         match command {
@@ -100,7 +100,7 @@ impl Cells {
             Command::Left => self.left(),
             Command::Increment => self.increment(),
             Command::Decrement => self.decrement(),
-            Command::Output => write!(out, "{}", self.output()?)?,
+            Command::Output => write!(output, "{}", self.output()?)?,
             Command::Input => {
                 let mut buf = [0];
                 input.read_exact(&mut buf)?;
@@ -108,7 +108,7 @@ impl Cells {
             }
             Command::Jump(block) => {
                 while !self.is_current_cell_zero() {
-                    self.interpret(block, out, input)?;
+                    self.interpret(block, output, input)?;
                 }
             }
         }
