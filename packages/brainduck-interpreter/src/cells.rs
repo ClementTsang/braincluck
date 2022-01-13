@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, fmt::Write};
+use std::{collections::VecDeque, fmt::Write, io::Read};
 
 use crate::{BrainduckError, Command};
 
@@ -69,26 +69,31 @@ impl Cells {
         self.memory[self.index] == 0
     }
 
-    pub fn debug(&self) {}
+    pub fn debug(&self) {
+        // TODO: Debug
+        unimplemented!()
+    }
 
     /// Given a list of commands, applies commands.
-    pub fn interpret<W: Write>(
+    pub fn interpret<W: Write, R: Read>(
         &mut self,
         commands: &[Command],
         out: &mut W,
+        input: &mut R,
     ) -> Result<(), BrainduckError> {
         for command in commands {
-            self.execute(command, out)?;
+            self.execute(command, out, input)?;
         }
 
         Ok(())
     }
 
     /// Executes a single command.
-    pub fn execute<W: Write>(
+    pub fn execute<W: Write, R: Read>(
         &mut self,
         command: &Command,
         out: &mut W,
+        input: &mut R,
     ) -> Result<(), BrainduckError> {
         match command {
             Command::Right => self.right(),
@@ -96,10 +101,14 @@ impl Cells {
             Command::Increment => self.increment(),
             Command::Decrement => self.decrement(),
             Command::Output => write!(out, "{}", self.output()?)?,
-            Command::Input => {}
+            Command::Input => {
+                let mut buf = [0];
+                input.read_exact(&mut buf)?;
+                self.input(buf[0] as i8);
+            }
             Command::Jump(block) => {
                 while !self.is_current_cell_zero() {
-                    self.interpret(block, out)?;
+                    self.interpret(block, out, input)?;
                 }
             }
         }
@@ -118,6 +127,8 @@ impl Default for Cells {
 #[cfg(test)]
 mod tests {
 
+    use std::io::Cursor;
+
     use crate::{bf_parse, Cells};
 
     /// Straightforward hello world.
@@ -128,9 +139,11 @@ mod tests {
         let commands = bf_parse(program).expect("hello world parsing returned an error");
 
         let mut out = String::new();
+        let input = vec![];
+        let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out)
+            .interpret(&commands, &mut out, &mut cursor)
             .expect("interpret should succeed");
 
         assert_eq!("Hello World!\n".to_string(), out, "outputs should match");
@@ -145,9 +158,11 @@ mod tests {
         let commands = bf_parse(program).expect("tricky hello world parsing returned an error");
 
         let mut out = String::new();
+        let input = vec![];
+        let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out)
+            .interpret(&commands, &mut out, &mut cursor)
             .expect("interpret should succeed");
 
         assert_eq!("Hello World!\n".to_string(), out, "outputs should match");
@@ -162,9 +177,11 @@ mod tests {
         let commands = bf_parse(program).expect("wrapping hello world parsing returned an error");
 
         let mut out = String::new();
+        let input = vec![];
+        let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out)
+            .interpret(&commands, &mut out, &mut cursor)
             .expect("interpret should succeed");
 
         assert_eq!("Hello, World!".to_string(), out, "outputs should match");
@@ -178,9 +195,11 @@ mod tests {
         let commands = bf_parse(program).expect("short hello world parsing returned an error");
 
         let mut out = String::new();
+        let input = vec![];
+        let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out)
+            .interpret(&commands, &mut out, &mut cursor)
             .expect("interpret should succeed");
 
         assert_eq!("Hello, World!".to_string(), out, "outputs should match");
@@ -216,9 +235,11 @@ mod tests {
         let commands = bf_parse(program).expect("cell size parsing returned an error");
 
         let mut out = String::new();
+        let input = vec![];
+        let mut cursor = Cursor::new(input);
 
         cells
-            .interpret(&commands, &mut out)
+            .interpret(&commands, &mut out, &mut cursor)
             .expect("interpret should succeed");
 
         assert_eq!("8 bit cells\n".to_string(), out, "outputs should match");
@@ -227,32 +248,46 @@ mod tests {
     /// A cat program where EOF returns 0.
     #[test]
     fn cat_zero() {
-        // let mut cells = Cells::default();
-        // let program = ",[.,]";
-        // let commands = bf_parse(program).expect("cat zero parsing returned an error");
+        let mut cells = Cells::default();
+        let program = ",[.,]";
+        let commands = bf_parse(program).expect("cat zero parsing returned an error");
 
-        //  let mut out = String::new();
-        // let read: Vec<u8> = vec!['t' as u8, 'e' as u8, 's' as u8, 't' as u8];
-        // let mut cursor = Cursor::new(read);
+        let mut out = String::new();
+        let input = vec![
+            'H' as u8, 'e' as u8, 'l' as u8, 'l' as u8, 'o' as u8, '!' as u8, 0,
+        ];
+        let mut cursor = Cursor::new(input);
 
-        // cells
-        //     .interpret(&commands, &mut writer, &mut cursor)
-        //     .expect("interpret should succeed");
+        cells
+            .interpret(&commands, &mut out, &mut cursor)
+            .expect("interpret should succeed");
+
+        assert_eq!("Hello!".to_string(), out, "outputs should match");
     }
 
     /// A cat program where EOF returns -1.
     #[test]
     fn cat_negative_one() {
-        // let mut cells = Cells::default();
-        // let program = ",+[-.,+]";
-        // let commands = bf_parse(program).expect("cat negative one parsing returned an error");
+        let mut cells = Cells::default();
+        let program = ",+[-.,+]";
+        let commands = bf_parse(program).expect("cat negative one parsing returned an error");
 
-        //  let mut out = String::new();
-        // let read: Vec<u8> = vec!['t' as u8, 'e' as u8, 's' as u8, 't' as u8];
-        // let mut cursor = Cursor::new(read);
+        let mut out = String::new();
+        let input = vec![
+            'H' as u8,
+            'e' as u8,
+            'l' as u8,
+            'l' as u8,
+            'o' as u8,
+            '!' as u8,
+            (-1 as i8) as u8,
+        ];
+        let mut cursor = Cursor::new(input);
 
-        // cells
-        //     .interpret(&commands, &mut writer, &mut cursor)
-        //     .expect("interpret should succeed");
+        cells
+            .interpret(&commands, &mut out, &mut cursor)
+            .expect("interpret should succeed");
+
+        assert_eq!("Hello!".to_string(), out, "outputs should match");
     }
 }
