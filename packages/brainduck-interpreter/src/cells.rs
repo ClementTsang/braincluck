@@ -1,6 +1,6 @@
-use std::collections::VecDeque;
+use std::{collections::VecDeque, fmt::Write};
 
-use crate::Command;
+use crate::{BrainduckError, Command};
 
 /// [`Cells`] are an array of memory cells that Brainfuck commands can be applied to.
 /// This array can continuously grow.
@@ -14,7 +14,6 @@ use crate::Command;
 pub struct Cells {
     memory: VecDeque<i8>, // TODO: Configurable bit size
     index: usize,
-    // TODO: Writer/Input
 }
 
 impl Cells {
@@ -54,10 +53,8 @@ impl Cells {
         self.memory[self.index] = self.memory[self.index].wrapping_sub(1);
     }
 
-    pub fn output(&self) -> Option<char> {
-        u8::try_from(self.memory[self.index])
-            .ok()
-            .map(|num| char::from(num))
+    pub fn output(&self) -> Result<char, BrainduckError> {
+        Ok(u8::try_from(self.memory[self.index]).map(|num| char::from(num))?)
     }
 
     pub fn input(&mut self, input: i8) {
@@ -75,28 +72,39 @@ impl Cells {
     pub fn debug(&self) {}
 
     /// Given a list of commands, applies commands.
-    pub fn interpret(&mut self, commands: &[Command]) {
+    pub fn interpret<W: Write>(
+        &mut self,
+        commands: &[Command],
+        out: &mut W,
+    ) -> Result<(), BrainduckError> {
         for command in commands {
-            match command {
-                Command::Right => self.right(),
-                Command::Left => self.left(),
-                Command::Increment => self.increment(),
-                Command::Decrement => self.decrement(),
-                Command::Output => {
-                    if let Some(c) = self.output() {
-                        // TODO: Output
-                    }
-                }
-                Command::Input => {
-                    // TODO: Input
-                }
-                Command::Jump(block) => {
-                    while !self.is_current_cell_zero() {
-                        self.interpret(block);
-                    }
+            self.execute(command, out)?;
+        }
+
+        Ok(())
+    }
+
+    /// Executes a single command.
+    pub fn execute<W: Write>(
+        &mut self,
+        command: &Command,
+        out: &mut W,
+    ) -> Result<(), BrainduckError> {
+        match command {
+            Command::Right => self.right(),
+            Command::Left => self.left(),
+            Command::Increment => self.increment(),
+            Command::Decrement => self.decrement(),
+            Command::Output => write!(out, "{}", self.output()?)?,
+            Command::Input => {}
+            Command::Jump(block) => {
+                while !self.is_current_cell_zero() {
+                    self.interpret(block, out)?;
                 }
             }
         }
+
+        Ok(())
     }
 }
 
@@ -109,6 +117,7 @@ impl Default for Cells {
 /// All these tests are based on code from the [Esolang wiki page](https://esolangs.org/wiki/Brainfuck) on the language.
 #[cfg(test)]
 mod tests {
+
     use crate::{bf_parse, Cells};
 
     /// Straightforward hello world.
@@ -116,10 +125,15 @@ mod tests {
     fn hello_world() {
         let mut cells = Cells::default();
         let program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
-
         let commands = bf_parse(program).expect("hello world parsing returned an error");
 
-        cells.interpret(&commands);
+        let mut out = String::new();
+
+        cells
+            .interpret(&commands, &mut out)
+            .expect("interpret should succeed");
+
+        assert_eq!("Hello World!\n".to_string(), out, "outputs should match");
     }
 
     /// This test can fail if cell values cannot be set below zero.
@@ -128,10 +142,15 @@ mod tests {
         let mut cells = Cells::default();
         let program = ">++++++++[-<+++++++++>]<.>>+>-[+]++>++>+++[>[->+++<<+++>]<<]>-----.>->
         +++..+++.>-.<<+[>[+>+]>>]<--------------.>>.+++.------.--------.>+.>+.";
-
         let commands = bf_parse(program).expect("tricky hello world parsing returned an error");
 
-        cells.interpret(&commands);
+        let mut out = String::new();
+
+        cells
+            .interpret(&commands, &mut out)
+            .expect("interpret should succeed");
+
+        assert_eq!("Hello World!\n".to_string(), out, "outputs should match");
     }
 
     /// A program to write hello world but requires wrapping cells.
@@ -142,7 +161,13 @@ mod tests {
             "--<-<<+[+[<+>--->->->-<<<]>]<<--.<++++++.<<-..<<.<+.>>.>>.<<<.+++.>>.>>-.<<<+.";
         let commands = bf_parse(program).expect("wrapping hello world parsing returned an error");
 
-        cells.interpret(&commands);
+        let mut out = String::new();
+
+        cells
+            .interpret(&commands, &mut out)
+            .expect("interpret should succeed");
+
+        assert_eq!("Hello, World!".to_string(), out, "outputs should match");
     }
 
     /// A program to write hello world using the shortest code golf example. Requires wrapping cells.
@@ -152,7 +177,13 @@ mod tests {
         let program = "+[-->-[>>+>-----<<]<--<---]>-.>>>+.>>..+++[.>]<<<<.+++.------.<<-.>>>>+.";
         let commands = bf_parse(program).expect("short hello world parsing returned an error");
 
-        cells.interpret(&commands);
+        let mut out = String::new();
+
+        cells
+            .interpret(&commands, &mut out)
+            .expect("interpret should succeed");
+
+        assert_eq!("Hello, World!".to_string(), out, "outputs should match");
     }
 
     /// Tests obtaining the cell size.
@@ -182,28 +213,46 @@ mod tests {
         Clean up used cells.
         [[-]<]
         "##;
-
         let commands = bf_parse(program).expect("cell size parsing returned an error");
-        cells.interpret(&commands);
+
+        let mut out = String::new();
+
+        cells
+            .interpret(&commands, &mut out)
+            .expect("interpret should succeed");
+
+        assert_eq!("8 bit cells\n".to_string(), out, "outputs should match");
     }
 
     /// A cat program where EOF returns 0.
     #[test]
     fn cat_zero() {
-        let mut cells = Cells::default();
-        let program = ",[.,]";
-        let commands = bf_parse(program).expect("cat zero parsing returned an error");
+        // let mut cells = Cells::default();
+        // let program = ",[.,]";
+        // let commands = bf_parse(program).expect("cat zero parsing returned an error");
 
-        cells.interpret(&commands);
+        //  let mut out = String::new();
+        // let read: Vec<u8> = vec!['t' as u8, 'e' as u8, 's' as u8, 't' as u8];
+        // let mut cursor = Cursor::new(read);
+
+        // cells
+        //     .interpret(&commands, &mut writer, &mut cursor)
+        //     .expect("interpret should succeed");
     }
 
     /// A cat program where EOF returns -1.
     #[test]
     fn cat_negative_one() {
-        let mut cells = Cells::default();
-        let program = ",+[-.,+]";
-        let commands = bf_parse(program).expect("cat negative one parsing returned an error");
+        // let mut cells = Cells::default();
+        // let program = ",+[-.,+]";
+        // let commands = bf_parse(program).expect("cat negative one parsing returned an error");
 
-        cells.interpret(&commands);
+        //  let mut out = String::new();
+        // let read: Vec<u8> = vec!['t' as u8, 'e' as u8, 's' as u8, 't' as u8];
+        // let mut cursor = Cursor::new(read);
+
+        // cells
+        //     .interpret(&commands, &mut writer, &mut cursor)
+        //     .expect("interpret should succeed");
     }
 }
