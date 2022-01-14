@@ -72,9 +72,8 @@ impl Cells {
         self.memory[self.index] == 0
     }
 
-    pub fn debug(&self) {
-        // TODO: Debug
-        unimplemented!()
+    pub fn cells(&self) -> &VecDeque<i8> {
+        &self.memory
     }
 
     /// Given a list of commands, applies commands.

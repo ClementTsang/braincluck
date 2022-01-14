@@ -1,6 +1,6 @@
 # brainduck-interpreter
 
-A library for bf parser/interpreter, using [lalrpop](https://github.com/lalrpop/lalrpop). Somewhat overkill.
+A library for a bf parser/interpreter, using [lalrpop](https://github.com/lalrpop/lalrpop). Somewhat overkill.
 
 ## Usage
 
@@ -34,11 +34,12 @@ A complete example demonstrating Hello World (source bf program from
 
 ```rust
 let mut cells = Cells::default();
-let program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
+let program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+
+    [<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 let commands = bf_parse(program).unwrap();
 let mut out = stdout();
 let mut input = stdin();
 cells.interpret(&commands, &mut out, &mut input).unwrap();
 ```
 
-See [here](../../examples/hello_world/) for an example.
+See [here](../../examples/hello_world/) for a running example of Hello World.
