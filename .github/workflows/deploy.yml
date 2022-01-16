@@ -51,7 +51,7 @@ jobs:
           trunk build --release
           cd ../../
 
-      - name: Deploy
+      - name: Push to web-deploy branch
         run: |
           git checkout --orphan web-deploy
           git reset
@@ -59,3 +59,7 @@ jobs:
           git add dist
           git commit -m "deploying brainduck web"
           git push --set-upstream origin web-deploy -f
+
+      - name: Deploy on CFP
+        run: |
+          curl -X POST ${{ secrets.BRAINDUCK_CFP_HOOK }}
