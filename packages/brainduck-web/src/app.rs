@@ -102,11 +102,11 @@ impl Component for Model {
                         </button>
                     </div>
                     <div class={classes!("flex","flex-1")}>
-                        <div class={classes!("flex", "flex-col", "lg:flex-row", "w-full", "h-full", "space-x-3")}>
+                        <div class={classes!("flex", "flex-col", "lg:flex-row", "w-full", "h-full", "lg:space-x-3", "space-y-3")}>
                             <div class={classes!("flex","flex-1")}>
                                 <textarea ref={self.textarea_ref.clone()} class={code_classes} autofocus=true style="resize: none;"></textarea>
                             </div>
-                            if !self.execution_open {
+                            if self.execution_open {
                                 <div class={output_classes}>
                                     <p class={classes!("text-center", "text-xl")}>
                                         {"Execution"}
