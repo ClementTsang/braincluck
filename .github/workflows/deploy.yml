@@ -21,7 +21,19 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install toolchain
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+
+      - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -44,6 +56,16 @@ jobs:
         run: |
           cargo install trunk --version ~0.14 --locked
           cargo install wasm-bindgen-cli --version ~0.2 --locked
+
+      - name: Install tailwindcss
+        run: |
+          npm install -g tailwindcss
+
+      - name: Build tailwind
+        run: |
+          cd "./packages/brainduck-web" 
+          tailwindcss -i input.css -o ./tailwind.css -m
+          cd ../../
 
       - name: Build
         run: |
