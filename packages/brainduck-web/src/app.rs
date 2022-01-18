@@ -13,6 +13,7 @@ pub enum Msg {
 
 pub struct Model {
     dark_mode: bool,
+    is_executing: bool,
     execution_open: bool,
 }
 
@@ -29,6 +30,7 @@ impl Component for Model {
                     None => false,
                 })
                 .unwrap_or(false),
+            is_executing: false,
             execution_open: false,
         }
     }
