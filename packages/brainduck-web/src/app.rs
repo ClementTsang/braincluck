@@ -1,7 +1,7 @@
-use web_sys::HtmlTextAreaElement;
+use web_sys::Window;
 use yew::prelude::*;
 
-use crate::components::{MoonIcon, RunIcon, SunIcon, TextDivider};
+use crate::components::*;
 
 pub enum Msg {
     Run,
@@ -14,7 +14,6 @@ pub enum Msg {
 pub struct Model {
     dark_mode: bool,
     execution_open: bool,
-    textarea_ref: NodeRef,
 }
 
 impl Component for Model {
@@ -23,18 +22,14 @@ impl Component for Model {
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
-            dark_mode: false,
+            dark_mode: web_sys::window()
+                .and_then(|window| window.match_media("(prefers-color-scheme: dark)").ok())
+                .map(|res| match res {
+                    Some(res) => res.matches(),
+                    None => false,
+                })
+                .unwrap_or(false),
             execution_open: false,
-            textarea_ref: NodeRef::default(),
-        }
-    }
-
-    fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
-        if first_render {
-            // Autofocus
-            if let Some(input) = self.textarea_ref.cast::<HtmlTextAreaElement>() {
-                let _ = input.focus();
-            }
         }
     }
 
@@ -74,34 +69,6 @@ impl Component for Model {
                 vec!["bg-slate-50"]
             })
         };
-
-        let code_classes = classes!(
-            "font-mono",
-            "p-6",
-            "border-2",
-            "rounded",
-            "border-blue",
-            "border-solid",
-            "w-full",
-            "h-full",
-            "bg-white",
-            "dark:bg-slate-800"
-        );
-
-        let output_classes = classes!(
-            "flex",
-            "flex-col",
-            "flex-1",
-            "p-2",
-            "border-2",
-            "rounded",
-            "border-blue",
-            "border-solid",
-            "w-full",
-            "h-full",
-            "bg-white",
-            "dark:bg-slate-800"
-        );
 
         html! {
             <body class={body_classes}>
@@ -151,17 +118,8 @@ impl Component for Model {
                     </div>
                     <div class={classes!("flex","flex-1")}>
                         <div class={classes!("flex", "flex-col", "lg:flex-row", "w-full", "h-full", "space-y-3", "lg:space-y-0", "lg:space-x-3")}>
-                            <div class={classes!("flex","flex-1")}>
-                                <textarea ref={self.textarea_ref.clone()} class={code_classes} autofocus=true style="resize: none;"></textarea>
-                            </div>
-                            if self.execution_open {
-                                <div class={output_classes}>
-                                    <p class={classes!("text-center", "text-xl")}>
-                                        {"Execution"}
-                                    </p>
-                                    <TextDivider text="Output"/>
-                                </div>
-                            }
+                            <Code/>
+                            <Output hidden={!self.execution_open}/>
                         </div>
                     </div>
                 </div>
