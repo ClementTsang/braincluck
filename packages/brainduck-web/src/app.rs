@@ -7,7 +7,8 @@ pub enum Msg {
     Run,
     OpenExecution,
     CloseExecution,
-    ToggleDarkMode,
+    EnableDarkMode,
+    DisableDarkMode,
 }
 
 pub struct Model {
@@ -51,8 +52,12 @@ impl Component for Model {
                 self.execution_open = false;
                 true
             }
-            Msg::ToggleDarkMode => {
-                self.dark_mode = !self.dark_mode;
+            Msg::EnableDarkMode => {
+                self.dark_mode = true;
+                true
+            }
+            Msg::DisableDarkMode => {
+                self.dark_mode = false;
                 true
             }
         }
@@ -61,6 +66,15 @@ impl Component for Model {
     fn view(&self, ctx: &Context<Self>) -> Html {
         // This gives us a component's "`Scope`" which allows us to send messages, etc to the component.
         let link = ctx.link();
+
+        let body_classes = {
+            classes!(if self.dark_mode {
+                vec!["dark", "bg-slate-700"]
+            } else {
+                vec!["bg-slate-50"]
+            })
+        };
+
         let code_classes = classes!(
             "font-mono",
             "p-6",
@@ -71,7 +85,9 @@ impl Component for Model {
             "w-full",
             "h-full",
             "bg-white",
+            "dark:bg-slate-800"
         );
+
         let output_classes = classes!(
             "flex",
             "flex-col",
@@ -84,25 +100,57 @@ impl Component for Model {
             "w-full",
             "h-full",
             "bg-white",
+            "dark:bg-slate-800"
         );
 
         html! {
-            <body class={classes!("bg-slate-50")}>
+            <body class={body_classes}>
                 <div class={classes!("flex", "flex-col", "w-screen", "h-screen", "p-6", "space-y-3")}>
-                    <div class={classes!("flex", "flex-none")}>
-                        <button onclick={link.callback(|_| Msg::Run)} class={classes!("bg-sky-600", "hover:bg-sky-700", "rounded", "p-3")}>
-                            <div class={classes!("flex", "items-center", "justify-center", "space-x-1")}>
-                                <p class={classes!("text-slate-50", "font-medium")}>
-                                    {"Run"}
-                                </p>
-                                <div class={classes!("h-4", "w-4")} style="color: white;">
-                                    <RunIcon />
+                    <div class={classes!("flex", "flex-none", "flex-row", "space-x-2")}>
+                        <div class={classes!("flex-none")}>
+                            <button onclick={link.callback(|_| Msg::Run)} class={classes!("bg-sky-600", "hover:bg-sky-700", "rounded", "p-3")}>
+                                <div class={classes!("flex", "items-center", "justify-center", "space-x-1")}>
+                                    <p class={classes!("text-slate-50", "font-medium")}>
+                                        {"Run"}
+                                    </p>
+                                    <div class={classes!("h-4", "w-4")} style="color: white;">
+                                        <RunIcon />
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
+                            </button>
+                        </div>
+                        <div class={classes!("flex-none")}>
+                            if self.dark_mode {
+                                <>
+                                    <button onclick={link.callback(|_| Msg::DisableDarkMode)}  class={classes!("bg-sky-600", "hover:bg-sky-700", "rounded", "p-3")}>
+                                        <div class={classes!("flex", "items-center", "justify-center", "space-x-1")}>
+                                            <p class={classes!("text-slate-50", "font-medium")}>
+                                                {"Light"}
+                                            </p>
+                                            <div class={classes!("h-4", "w-4")} style="color: white;">
+                                                <SunIcon />
+                                            </div>
+                                        </div>
+                                    </button>
+                                </>
+                            } else {
+                                <>
+                                    <button onclick={link.callback(|_| Msg::EnableDarkMode)}  class={classes!("bg-sky-600", "hover:bg-sky-700", "rounded", "p-3")}>
+                                        <div class={classes!("flex", "items-center", "justify-center", "space-x-1")}>
+                                            <p class={classes!("text-slate-50", "font-medium")}>
+                                                {"Dark"}
+                                            </p>
+                                            <div class={classes!("h-4", "w-4")} style="color: white;">
+                                                <MoonIcon />
+                                            </div>
+                                        </div>
+                                    </button>
+                                </>
+                            }
+                        </div>
                     </div>
                     <div class={classes!("flex","flex-1")}>
-                        <div class={classes!("flex", "flex-col", "lg:flex-row", "w-full", "h-full", "lg:space-x-3", "space-y-3")}>
+                        <div class={classes!("flex", "flex-col", "lg:flex-row", "w-full", "h-full", "space-y-3", "lg:space-y-0", "lg:space-x-3")}>
                             <div class={classes!("flex","flex-1")}>
                                 <textarea ref={self.textarea_ref.clone()} class={code_classes} autofocus=true style="resize: none;"></textarea>
                             </div>
