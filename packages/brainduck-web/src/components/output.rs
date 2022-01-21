@@ -1,5 +1,5 @@
 use crate::components::*;
-use yew::{classes, function_component, html, Properties, Children};
+use yew::{classes, function_component, html, Properties};
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct OutputProps {
@@ -7,7 +7,7 @@ pub struct OutputProps {
     pub hidden: bool,
 
     #[prop_or_default]
-    pub children: Children,
+    pub text: String,
 }
 
 #[function_component(Output)]
@@ -31,6 +31,17 @@ pub fn output(props: &OutputProps) -> Html {
         }
     );
 
+    let code_classes = classes!(
+        "font-mono",
+        "text-black",
+        "dark:text-slate-50",
+        "p-6",
+        "w-full",
+        "h-full",
+        "bg-white",
+        "dark:bg-slate-800",
+    );
+
     html! {
         if !props.hidden {
             <div class={output_classes}>
@@ -40,10 +51,10 @@ pub fn output(props: &OutputProps) -> Html {
                     </p>
                 </div>
                 <TextDivider text="Output"/>
-                if !props.children.is_empty() {
-                    <div>
-                        { for props.children.iter() }
-                    </div>
+                if !props.text.is_empty() {
+                    <pre class={code_classes}>
+                        { props.text.clone() } // TODO: Escape?
+                    </pre>
                 }
             </div>
         }

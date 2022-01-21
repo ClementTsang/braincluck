@@ -1,5 +1,5 @@
 use web_sys::HtmlTextAreaElement;
-use yew::{classes, function_component, functional::*, html, Properties, NodeRef};
+use yew::{classes, function_component, functional::*, html, NodeRef, Properties};
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct CodeProps {
@@ -31,6 +31,8 @@ pub fn code(props: &CodeProps) -> Html {
         use_effect(move || {
             if let Some(input) = textarea_ref.cast::<HtmlTextAreaElement>() {
                 let _ = input.focus();
+                // const HELLO_WORLD: &str = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
+                // input.set_value(HELLO_WORLD);
             }
             || ()
         });
@@ -38,7 +40,14 @@ pub fn code(props: &CodeProps) -> Html {
 
     html! {
         <div class={classes!("flex","flex-1")}>
-            <textarea ref={textarea_ref} class={code_classes} autofocus=true style="resize: none;" placeholder="Your code here"></textarea>
+            <textarea
+                ref={textarea_ref}
+                class={code_classes}
+                autofocus=true
+                style="resize: none;"
+                placeholder="Your code goes here!"
+            >
+            </textarea>
         </div>
     }
 }

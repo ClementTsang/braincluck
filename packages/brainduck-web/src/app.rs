@@ -1,7 +1,7 @@
-use yew::prelude::*;
-use web_sys::HtmlTextAreaElement;
 use brainduck_interpreter::{bf_parse, Cells};
 use std::io::{BufWriter, Cursor};
+use web_sys::HtmlTextAreaElement;
+use yew::prelude::*;
 
 #[cfg(feature = "console_log")]
 use log::debug;
@@ -21,6 +21,7 @@ pub struct App {
     dark_mode: bool,
     output_open: bool,
     text_ref: NodeRef,
+    temp_output: String,
 }
 
 impl Component for App {
@@ -38,6 +39,7 @@ impl Component for App {
                 .unwrap_or(false),
             output_open: false,
             text_ref: NodeRef::default(),
+            temp_output: String::default(),
         }
     }
 
@@ -45,6 +47,8 @@ impl Component for App {
         match msg {
             Msg::Run => {
                 self.output_open = true;
+                self.temp_output = String::default();
+
                 if let Some(input) = self.text_ref.cast::<HtmlTextAreaElement>() {
                     let code = input.value();
                     #[cfg(feature = "console_log")]
@@ -60,12 +64,12 @@ impl Component for App {
                             let output = String::from_utf8(
                                 buf_out
                                     .into_inner()
-                                    .expect("getting inner buffer should work")
+                                    .expect("getting inner buffer should work"),
                             )
                             .expect("string should be valid utf8");
                             debug!("output: {:?}", output);
+                            self.temp_output = output;
                         }
-
                     }
                 }
                 true
@@ -79,6 +83,7 @@ impl Component for App {
                 true
             }
             Msg::ClearOutput => {
+                self.temp_output = String::default();
                 true
             }
         }
@@ -120,7 +125,7 @@ impl Component for App {
                         </div>
                         <div class={classes!("flex-1", "flex", "flex-row", "justify-end", "space-x-2")}>
                             if self.output_open {
-                                <IconButton class={classes!("flex-none")} onclick={clear_output_onclick} text={ "Clear" } />
+                                <IconButton class={classes!("flex-none")} onclick={clear_output_onclick} text={ "Clear Output" } />
                             }
                             <IconButton class={classes!("flex-none")} onclick={toggle_output_onclick} text={ if self.output_open { "Hide Output" } else { "Show Output" } } />
                         </div>
@@ -128,8 +133,7 @@ impl Component for App {
                     <div class={classes!("flex","flex-1")}>
                         <div class={classes!("flex", "flex-col", "lg:flex-row", "w-full", "h-full", "space-y-3", "lg:space-y-0", "lg:space-x-3")}>
                             <Code text_ref={self.text_ref.clone()} />
-                            <Output hidden={!self.output_open}>
-                            </Output>
+                            <Output hidden={!self.output_open} text={self.temp_output.clone()}/>
                         </div>
                     </div>
                 </div>
