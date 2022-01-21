@@ -4,6 +4,7 @@ use web_sys::HtmlTextAreaElement;
 use yew::prelude::*;
 
 #[cfg(feature = "console_log")]
+#[allow(unused_imports)]
 use log::debug;
 
 use crate::components::*;
@@ -51,8 +52,6 @@ impl Component for App {
 
                 if let Some(input) = self.text_ref.cast::<HtmlTextAreaElement>() {
                     let code = input.value();
-                    #[cfg(feature = "console_log")]
-                    debug!("code: {:?}", code);
 
                     if let Ok(code) = bf_parse(&code) {
                         let mut cells = Cells::default();
@@ -67,7 +66,6 @@ impl Component for App {
                                     .expect("getting inner buffer should work"),
                             )
                             .expect("string should be valid utf8");
-                            debug!("output: {:?}", output);
                             self.temp_output = output;
                         }
                     }

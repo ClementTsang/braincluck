@@ -60,12 +60,6 @@ jobs:
           cargo install trunk --version ~0.14 --locked
           cargo install wasm-bindgen-cli --version ~0.2 --locked
 
-      - name: Build Tailwind CSS file
-        run: |
-          cd "./packages/brainduck-web" 
-          tailwindcss -i input.css -o ./tailwind.css -m
-          cd ../../
-
       - name: Build
         run: |
           cd "./packages/brainduck-web"
