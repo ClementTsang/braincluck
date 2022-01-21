@@ -15,3 +15,6 @@ pub use code::Code;
 
 pub mod output;
 pub use output::Output;
+
+pub mod icon_button;
+pub use icon_button::IconButton;

@@ -26,12 +26,15 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Cache dependencies
-        uses: actions/cache@v2
+      - uses: actions/cache@v2
         with:
           path: ~/.npm
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
+
+      - name: Install tailwindcss
+        run: |
+          npm install -g tailwindcss
 
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -57,11 +60,7 @@ jobs:
           cargo install trunk --version ~0.14 --locked
           cargo install wasm-bindgen-cli --version ~0.2 --locked
 
-      - name: Install tailwindcss
-        run: |
-          npm install -g tailwindcss
-
-      - name: Build tailwind
+      - name: Build Tailwind CSS file
         run: |
           cd "./packages/brainduck-web" 
           tailwindcss -i input.css -o ./tailwind.css -m
