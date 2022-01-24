@@ -1,6 +1,6 @@
 use std::io::{stdin, stdout};
 
-use brainduck_interpreter::{bf_parse, Cells};
+use braincluck_interpreter::{bf_parse, Cells};
 
 fn main() {
     let mut cells = Cells::default();

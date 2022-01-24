@@ -3,7 +3,7 @@ use std::{
     io::{Read, Write},
 };
 
-use crate::{BrainduckError, Command};
+use crate::{BraincluckError, Command};
 
 /// [`Cells`] are an array of memory cells that Brainfuck commands can be applied to.
 /// This array can continuously grow.
@@ -56,7 +56,7 @@ impl Cells {
         self.memory[self.index] = self.memory[self.index].wrapping_sub(1);
     }
 
-    pub fn output(&self) -> Result<char, BrainduckError> {
+    pub fn output(&self) -> Result<char, BraincluckError> {
         Ok(u8::try_from(self.memory[self.index]).map(|num| char::from(num))?)
     }
 
@@ -82,7 +82,7 @@ impl Cells {
         commands: &[Command],
         output: &mut W,
         input: &mut R,
-    ) -> Result<(), BrainduckError> {
+    ) -> Result<(), BraincluckError> {
         for command in commands {
             self.execute(command, output, input)?;
         }
@@ -96,7 +96,7 @@ impl Cells {
         command: &Command,
         output: &mut W,
         input: &mut R,
-    ) -> Result<(), BrainduckError> {
+    ) -> Result<(), BraincluckError> {
         match command {
             Command::Right => self.right(),
             Command::Left => self.left(),

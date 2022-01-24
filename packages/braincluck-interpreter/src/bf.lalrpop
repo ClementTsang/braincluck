@@ -3,7 +3,7 @@ use crate::lexer;
 
 grammar;
 
-pub Brainduck: Vec<Command> = {
+pub Braincluck: Vec<Command> = {
     <term*>,
 }
 

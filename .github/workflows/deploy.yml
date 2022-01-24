@@ -5,7 +5,7 @@ on:
   push:
 
 env:
-  # Assign commit authorship to official Github Actions bot when pushing to the `gh-pages` branch:
+  # Assign commit authorship to official Github Actions bot when pushing to the `web-deploy` branch:
   GIT_USER: "github-actions[bot]"
   GIT_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -62,7 +62,7 @@ jobs:
 
       - name: Build
         run: |
-          cd "./packages/brainduck-web"
+          cd "./packages/braincluck-web"
           trunk build --release
           cd ../../
 
@@ -70,11 +70,11 @@ jobs:
         run: |
           git checkout --orphan web-deploy
           git reset
-          mv "./packages/brainduck-web/dist" .
+          mv "./packages/braincluck-web/dist" .
           git add dist
-          git commit -m "deploying brainduck web"
+          git commit -m "deploying braincluck web"
           git push --set-upstream origin web-deploy -f
 
       - name: Deploy on CFP
         run: |
-          curl -X POST ${{ secrets.BRAINDUCK_CFP_HOOK }}
+          curl -X POST ${{ secrets.braincluck_CFP_HOOK }}

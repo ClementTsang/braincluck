@@ -1,4 +1,4 @@
-use brainduck_interpreter::{bf_parse, Cells};
+use braincluck_interpreter::{bf_parse, Cells};
 use std::io::{BufWriter, Cursor};
 use web_sys::HtmlTextAreaElement;
 use yew::prelude::*;

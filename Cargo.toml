@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "packages/brainduck-interpreter",
-    "packages/brainduck-web",
+    "packages/braincluck-interpreter",
+    "packages/braincluck-web",
     "examples/hello_world",
     "examples/cat",
 ]

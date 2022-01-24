@@ -1,5 +1,5 @@
 [package]
-name = "brainduck-interpreter"
+name = "braincluck-interpreter"
 version = "0.1.0"
 edition = "2021"
 

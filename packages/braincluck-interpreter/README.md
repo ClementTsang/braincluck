@@ -1,4 +1,4 @@
-# brainduck-interpreter
+# braincluck-interpreter
 
 A library for a bf parser/interpreter, using [lalrpop](https://github.com/lalrpop/lalrpop). Somewhat overkill.
 
