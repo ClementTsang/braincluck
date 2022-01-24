@@ -77,4 +77,4 @@ jobs:
 
       - name: Deploy on CFP
         run: |
-          curl -X POST ${{ secrets.braincluck_CFP_HOOK }}
+          curl -X POST ${{ secrets.BRAINCLUCK_CFP_HOOK }}
